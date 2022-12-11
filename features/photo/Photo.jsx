@@ -1,10 +1,5 @@
 import React from 'react';
-import {View, Image, Dimensions, StyleSheet} from "react-native";
-
-const {width} = Dimensions.get('screen')
-
-const WIDTH = width
-const PADDING = 5
+import {View, Image, StyleSheet} from "react-native";
 
 export const Photo = ({route, navigation}) => {
     return (
@@ -24,10 +19,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 5,
     },
     image: {
-        backgroundColor: 'white',
-        width: (WIDTH - PADDING),
-        height: (WIDTH - PADDING),
-        borderRadius: 15,
-        resizeMode: "contain"
+        width: '100%',
+        height: '100%',
+        resizeMode: "contain",
     }
 });

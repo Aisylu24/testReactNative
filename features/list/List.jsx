@@ -1,50 +1,56 @@
-import React from 'react';
-import {View, StyleSheet, Dimensions, Text, FlatList, Image, TouchableWithoutFeedback} from "react-native";
+import React, {useEffect} from 'react';
+import {
+    View,
+    StyleSheet,
+    Dimensions,
+    Text,
+    FlatList,
+    Image,
+    TouchableWithoutFeedback,
+    ActivityIndicator
+} from "react-native";
 import {useNavigation} from "@react-navigation/native";
+import {useDispatch, useSelector} from "react-redux";
+import {fetchDataTC} from "../../state/dataReducer";
 
 const {width} = Dimensions.get('screen')
 
 const WIDTH = width
 const PADDING = 10
 
-const authors = ['John', 'Lorem', 'John', 'Lorem', 'John']
-const imgItems = [
-    "https://outdoorgearlab-mvnab3pwrvp3t0.stackpathdns.com/photos/23/66/358121_9734_XXL.jpg",
-    "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/index-winter-hats-1663960249.jpg?crop=0.502xw:1.00xh;0.250xw,0&resize=640:*",
-    "https://hips.hearstapps.com/vader-prod.s3.amazonaws.com/1572286952-1860071_522_f.jpg",
-    "https://m.media-amazon.com/images/I/91XxeQfdVuL.jpg",
-    "https://img.joomcdn.net/802c7e249f8ad2e0e20fdcfb72e939c9d89f22b9_original.jpeg"
-
-]
-
-const data = new Array(50).fill(null).map((_, index) => ({
-    id: index + 1,
-    imgItem: imgItems[index % 5],
-    author:authors[index % 5]
-}))
-
 export const List = () => {
+
+    const data = useSelector(state => state.data)
+    const {loader, error} = useSelector(state => state.app)
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(fetchDataTC());
+    }, [dispatch]);
 
     const navigation = useNavigation()
 
     const renderItem = ({item}) => {
         return (
             <View style={styles.item}>
-                    <TouchableWithoutFeedback onPress={() => {
-                        navigation.navigate('Photo', {image: item.imgItem})
-                    }}>
-                        <Image
-                            style={styles.img}
-                            source={{uri: item.imgItem}}/>
-                    </TouchableWithoutFeedback>
-
+                <TouchableWithoutFeedback onPress={() => {
+                    navigation.navigate('Photo', {image: item.urlToImage})
+                }}>
+                    <Image
+                        style={styles.img}
+                        source={{uri: item.urlToImage}}/>
+                </TouchableWithoutFeedback>
                 <View style={styles.itemTextContainer}>
-                 <Text style={styles.author}>Author: </Text><Text>{item.author}</Text>
+                    <Text style={styles.author}>Author: </Text><Text>{item.author}</Text>
                 </View>
             </View>
         )
     }
 
+    if (error) return <View style={styles.container} ><Text style={styles.error}>Error: {error}</Text></View>
+
+    if (!loader) return <View style={styles.container}><ActivityIndicator size="large" color='purple'/></View>
 
     return (
         <View style={styles.container}>
@@ -52,7 +58,7 @@ export const List = () => {
             <FlatList
                 ListHeaderComponent={() =>
                     <View style={styles.textContainer}>
-                            <Text style={styles.touchText}>Touch a photo to ZOOM it</Text>
+                        <Text style={styles.touchText}>Touch a photo to ZOOM it</Text>
                     </View>}
                 data={data}
                 renderItem={renderItem}
@@ -61,10 +67,8 @@ export const List = () => {
                 columnWrapperStyle={{justifyContent: 'space-between'}}
             />
         </View>
-);
+    );
 };
-
-
 
 const styles = StyleSheet.create({
     container: {
@@ -77,17 +81,19 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         marginVertical: 5,
         width: (WIDTH - PADDING * 2) / 2 - 5,
-        height: (WIDTH - PADDING * 2) / 1.5 - 5,
-        borderRadius: 15
+        height: (WIDTH - PADDING * 2) / 2 - 5,
+        paddingBottom: 10,
+        justifyContent: 'space-around'
     },
     img: {
         width: '100%',
-        height: '90%',
-        resizeMode: "contain"
+        height: '60%',
+        resizeMode: "contain",
     },
     itemTextContainer: {
-       flexDirection: "row",
+        flexDirection: "row",
         marginLeft: 5,
+        flexWrap: "wrap"
     },
     textContainer: {
         height: 50,
@@ -112,5 +118,10 @@ const styles = StyleSheet.create({
     },
     author: {
         color: 'purple'
+    },
+    error: {
+        textAlign: 'center',
+        fontWeight: 'bold',
+        fontSize: 30
     }
 });
